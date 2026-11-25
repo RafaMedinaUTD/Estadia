@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="mb-6">
+    <h1 class="text-2xl font-semibold">Notas de entrada <span class="text-base font-medium" style="color:var(--muted)">FOR-CSV-DAD-PQM-01</span></h1>
+    <p class="text-sm" style="color:var(--muted)">Ingreso de materia prima o producción terminada al almacén.</p>
+</div>
+
+<!-- Formulario -->
+<div class="card p-6 mb-6">
+    <form action="{{ url_for('entradas') }}" method="POST" class="space-y-6">
+
+        <section>
+            <h2 class="group-title">Datos del documento</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="field">
+                    <label for="folio">Folio *</label>
+                    <input id="folio" type="text" name="folio" required placeholder="Ej. ENT-001">
+                </div>
+                <div class="field">
+                    <label for="fecha">Fecha *</label>
+                    <input id="fecha" type="date" name="fecha" required>
+                </div>
+                <div class="field">
+                    <label for="proveedor">Proveedor / origen</label>
+                    <input id="proveedor" type="text" name="proveedor" placeholder="Ej. Cemex / Producción Patio">
+                </div>
+                <div class="field">
+                    <label for="factura_no">Factura No.</label>
+                    <input id="factura_no" type="text" name="factura_no" placeholder="Opcional">
+                </div>
+                <div class="field">
+                    <label for="remision_no">Remisión No.</label>
+                    <input id="remision_no" type="text" name="remision_no" placeholder="Opcional">
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2 class="group-title">Material que ingresa</h2>
+            <div class="item-box grid grid-cols-1 md:grid-cols-4 gap-4 items-end" style="--rule:var(--entry)">
+                <div class="field md:col-span-2">
+                    <label for="material_id">Material *</label>
+                    <select id="material_id" name="material_id" required>
+                        <option value="">Selecciona un material</option>
+                        {% for m in materiales %}
+                            <option value="{{ m['id'] }}">{{ m['nombre'] }} ({{ m['unidad'] }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="cantidad">Cantidad *</label>
+                    <input id="cantidad" type="number" step="any" min="0.01" name="cantidad" required placeholder="0.00">
+                </div>
+                <div class="field">
+                    <label for="importe">Importe ($)</label>
+                    <input id="importe" type="number" step="any" min="0" name="importe" placeholder="0.00">
+                </div>
+            </div>
+        </section>
+
+        <div class="flex justify-end">
+            <button type="submit" class="btn btn-entry">Guardar nota de entrada</button>
+        </div>
+    </form>
+</div>
+
+<!-- Historial -->
+<div class="card overflow-hidden">
+    <div class="card-head"><h3>Historial de entradas registradas</h3></div>
+    <div class="overflow-x-auto">
+        <table class="tbl">
+            <thead>
+                <tr>
+                    <th>Folio</th>
+                    <th>Fecha</th>
+                    <th>Proveedor</th>
+                    <th>Material</th>
+                    <th class="text-right">Cantidad</th>
+                    <th class="text-right">Importe</th>
+                    <th class="text-center">Formato</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for e in entradas %}
+                <tr class="in">
+                    <td class="font-medium">{{ e['folio'] }}</td>
+                    <td>{{ e['fecha'] }}</td>
+                    <td>{{ e['proveedor'] or '-' }}</td>
+                    <td>{{ e['descripcion'] }}</td>
+                    <td class="num" style="color:var(--entry)">+{{ e['cantidad'] }} {{ e['unidad'] }}</td>
+                    <td class="num" style="font-weight:400">${{ "%.2f"|format(e['importe'] or 0) }}</td>
+                    <td class="text-center whitespace-nowrap">
+                        <a href="{{ url_for('descargar_excel_entrada', entrada_id=e['id']) }}"
+                           class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-semibold transition hover:opacity-85"
+                           style="background:var(--entry-bg); color:var(--entry); border:1px solid var(--entry)"
+                           title="Descargar Nota de Entrada en Excel">
+                            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                            Excel
+                        </a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="7" class="empty">No hay notas de entrada registradas.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

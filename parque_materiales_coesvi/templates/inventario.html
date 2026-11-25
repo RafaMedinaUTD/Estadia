@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="mb-6">
+    <h1 class="text-2xl font-semibold">Inventario y catálogo de materiales</h1>
+    <p class="text-sm" style="color:var(--muted)">Existencias físicas disponibles en el Parque de Materiales.</p>
+</div>
+
+<!-- Alta de material -->
+<div class="card p-6 mb-6">
+    <h2 class="group-title">Agregar material al catálogo</h2>
+    <form action="{{ url_for('agregar_material') }}" method="POST" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="field">
+            <label for="codigo">Código (opcional)</label>
+            <input id="codigo" type="text" name="codigo" placeholder="Ej. MAT-01">
+        </div>
+        <div class="field">
+            <label for="nombre">Nombre del material *</label>
+            <input id="nombre" type="text" name="nombre" required placeholder="Ej. Block 15x20x40">
+        </div>
+        <div class="field">
+            <label for="unidad">Unidad de medida *</label>
+            <input id="unidad" type="text" name="unidad" required placeholder="Ej. Pieza, tonelada, bulto">
+        </div>
+        <div class="flex items-end">
+            <button type="submit" class="btn btn-main w-full">Registrar material</button>
+        </div>
+    </form>
+</div>
+
+<!-- Existencias -->
+<div class="card overflow-hidden">
+    <div class="card-head">
+        <h3>Existencias actuales en patio</h3>
+        <span class="text-sm" style="color:var(--muted)">{{ materiales|length }} material{{ '' if materiales|length == 1 else 'es' }}</span>
+    </div>
+    <div class="overflow-x-auto">
+        <table class="tbl">
+            <thead>
+                <tr>
+                    <th>Código</th>
+                    <th>Material / descripción</th>
+                    <th>Unidad</th>
+                    <th>Estado</th>
+                    <th class="text-right">Stock disponible</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for m in materiales %}
+                {% set stock = m['stock_actual'] or 0 %}
+                <tr>
+                    <td style="color:var(--muted)">{{ m['codigo'] or '-' }}</td>
+                    <td class="font-medium">{{ m['nombre'] }}</td>
+                    <td>{{ m['unidad'] }}</td>
+                    <td>
+                        {% if stock <= 0 %}
+                            <span class="chip chip-zero">Agotado</span>
+                        {% else %}
+                            <span class="chip chip-ok">Disponible</span>
+                        {% endif %}
+                    </td>
+                    <td class="num text-base" style="color: {% if stock <= 0 %}var(--alert){% else %}var(--entry){% endif %}">
+                        {{ "%.2f"|format(stock) }}
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="5" class="empty">Aún no hay materiales dados de alta. Agrega uno arriba para comenzar.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

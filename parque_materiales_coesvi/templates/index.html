@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="mb-6">
+    <h1 class="text-2xl font-semibold">Panel de control general</h1>
+    <p class="text-sm" style="color:var(--muted)">Resumen de movimientos y existencias en patio.</p>
+</div>
+
+<!-- Franja de indicadores -->
+<div class="card grid grid-cols-1 md:grid-cols-3 mb-8 overflow-hidden">
+    <div class="p-6 border-b md:border-b-0 md:border-r" style="border-color:var(--line)">
+        <p class="text-sm font-medium" style="color:var(--muted)">Materiales en catálogo</p>
+        <p class="display text-4xl font-bold mt-1">{{ total_materiales }}</p>
+        <a href="{{ url_for('inventario') }}" class="link mt-2 inline-block">Ver inventario completo</a>
+    </div>
+    <div class="p-6 border-b md:border-b-0 md:border-r" style="border-color:var(--line); box-shadow: inset 0 3px 0 var(--entry)">
+        <p class="text-sm font-medium" style="color:var(--muted)">Notas de entrada registradas</p>
+        <p class="display text-4xl font-bold mt-1" style="color:var(--entry)">{{ total_entradas }}</p>
+        <a href="{{ url_for('entradas') }}" class="link mt-2 inline-block">Registrar nueva entrada</a>
+    </div>
+    <div class="p-6" style="box-shadow: inset 0 3px 0 var(--exit)">
+        <p class="text-sm font-medium" style="color:var(--muted)">Notas de salida registradas</p>
+        <p class="display text-4xl font-bold mt-1" style="color:var(--exit)">{{ total_salidas }}</p>
+        <a href="{{ url_for('salidas') }}" class="link mt-2 inline-block">Registrar nueva salida</a>
+    </div>
+</div>
+
+<!-- Actividad reciente -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="card overflow-hidden">
+        <div class="card-head">
+            <h2>Últimas notas de entrada</h2>
+            <a href="{{ url_for('entradas') }}" class="link">Ver todas</a>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="tbl">
+                <thead>
+                    <tr><th>Folio</th><th>Fecha</th><th>Proveedor / origen</th></tr>
+                </thead>
+                <tbody>
+                    {% for e in ultimas_entradas %}
+                    <tr class="in">
+                        <td class="font-medium">{{ e['folio'] }}</td>
+                        <td>{{ e['fecha'] }}</td>
+                        <td>{{ e['proveedor'] or 'Producción interna' }}</td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="3" class="empty">Aún no hay entradas registradas.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card overflow-hidden">
+        <div class="card-head">
+            <h2>Últimas notas de salida</h2>
+            <a href="{{ url_for('salidas') }}" class="link">Ver todas</a>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="tbl">
+                <thead>
+                    <tr><th>Folio</th><th>Fecha</th><th>Beneficiario</th></tr>
+                </thead>
+                <tbody>
+                    {% for s in ultimas_salidas %}
+                    <tr class="out">
+                        <td class="font-medium">{{ s['folio'] }}</td>
+                        <td>{{ s['fecha'] }}</td>
+                        <td>{{ s['beneficiario'] }}</td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="3" class="empty">Aún no hay salidas registradas.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="mb-6">
+    <h1 class="text-2xl font-semibold">Notas de salida <span class="text-base font-medium" style="color:var(--muted)">FOR-CSV-DAD-PQM-02</span></h1>
+    <p class="text-sm" style="color:var(--muted)">Entrega de material terminado a beneficiarios y programas sociales.</p>
+</div>
+
+<!-- Formulario -->
+<div class="card p-6 mb-6">
+    <form action="{{ url_for('salidas') }}" method="POST" class="space-y-6">
+
+        <section>
+            <h2 class="group-title">Datos del documento</h2>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div class="field">
+                    <label for="folio">Folio *</label>
+                    <input id="folio" type="text" name="folio" required placeholder="Ej. SAL-001">
+                </div>
+                <div class="field">
+                    <label for="fecha">Fecha *</label>
+                    <input id="fecha" type="date" name="fecha" required>
+                </div>
+                <div class="field">
+                    <label for="beneficiario">Entregado a (beneficiario / obra) *</label>
+                    <input id="beneficiario" type="text" name="beneficiario" required placeholder="Nombre completo del beneficiario">
+                </div>
+                <div class="field">
+                    <label for="recibe_en">Recibe en</label>
+                    <input id="recibe_en" type="text" name="recibe_en" placeholder="Ej. Obra / Domicilio / Patio">
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2 class="group-title">Material que sale</h2>
+            <div class="item-box grid grid-cols-1 md:grid-cols-3 gap-4 items-end" style="--rule:var(--exit)">
+                <div class="field md:col-span-2">
+                    <label for="material_id">Material a entregar *</label>
+                    <select id="material_id" name="material_id" required>
+                        <option value="">Selecciona un material disponible</option>
+                        {% for m in materiales %}
+                            <option value="{{ m['id'] }}">{{ m['nombre'] }} — Disponible: {{ "%.2f"|format(m['stock_actual']) }} {{ m['unidad'] }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="cantidad">Cantidad a descontar *</label>
+                    <input id="cantidad" type="number" step="any" min="0.01" name="cantidad" required placeholder="0.00">
+                </div>
+            </div>
+        </section>
+
+        <div class="flex justify-end">
+            <button type="submit" class="btn btn-exit">Registrar nota de salida</button>
+        </div>
+    </form>
+</div>
+
+<!-- Historial -->
+<div class="card overflow-hidden">
+    <div class="card-head"><h3>Historial de salidas registradas</h3></div>
+    <div class="overflow-x-auto">
+        <table class="tbl">
+            <thead>
+                <tr>
+                    <th>Folio</th>
+                    <th>Fecha</th>
+                    <th>Beneficiario</th>
+                    <th>Recibe en</th>
+                    <th>Material</th>
+                    <th class="text-right">Cantidad</th>
+                    <th class="text-center">Formato</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for s in salidas %}
+                <tr class="out">
+                    <td class="font-medium">{{ s['folio'] }}</td>
+                    <td>{{ s['fecha'] }}</td>
+                    <td>{{ s['beneficiario'] }}</td>
+                    <td>{{ s['recibe_en'] or '-' }}</td>
+                    <td>{{ s['descripcion'] }}</td>
+                    <td class="num" style="color:var(--exit)">-{{ s['cantidad'] }} {{ s['unidad'] }}</td>
+                    <td class="text-center whitespace-nowrap">
+                        <a href="{{ url_for('descargar_excel_salida', salida_id=s['id']) }}"
+                           class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-semibold transition hover:opacity-85"
+                           style="background:var(--exit-bg); color:var(--exit); border:1px solid var(--exit)"
+                           title="Descargar Nota de Salida en Excel">
+                            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                            Excel
+                        </a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="7" class="empty">No hay notas de salida registradas.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

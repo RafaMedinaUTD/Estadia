@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parque de Materiales - COESVI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --ink: #17231F;      /* texto principal */
+            --muted: #5C6B65;    /* texto secundario */
+            --line: #D8DFDA;     /* bordes */
+            --bg: #ECEFEB;       /* fondo de página: gris concreto */
+            --tint: #F5F7F4;    /* fondos de apoyo */
+            --pine: #0F2A23;     /* barra lateral */
+            --pine-2: #1B4A3D;   /* acción principal */
+            --brass: #D9A441;    /* indicador activo */
+            --entry: #1F6B4F;    /* entradas */
+            --entry-bg: #E3F0E9;
+            --exit: #A8650F;     /* salidas */
+            --exit-bg: #F7ECD7;
+            --alert: #A9322A;    /* agotado / error */
+            --alert-bg: #F8E3E0;
+            --focus: #2F8F73;
+        }
+        body { font-family: 'IBM Plex Sans', system-ui, sans-serif; background: var(--bg); color: var(--ink); }
+        h1, h2, h3, .display { font-family: 'Archivo', 'IBM Plex Sans', system-ui, sans-serif; }
+
+        /* Barra lateral */
+        .sidebar { background: var(--pine); color: #fff; }
+        .nav a { display: flex; align-items: center; gap: .75rem; padding: .6rem .85rem; border-radius: 6px;
+                 color: #B4C9C0; font-size: .9rem; font-weight: 500; white-space: nowrap; transition: background .15s, color .15s; }
+        .nav a:hover { background: rgba(255,255,255,.07); color: #fff; }
+        .nav a.active { background: var(--pine-2); color: #fff; box-shadow: inset 3px 0 0 var(--brass); }
+        .nav svg { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+        @media (min-width: 1024px) {
+            .sidebar { position: sticky; top: 0; height: 100vh; width: 16rem; flex: none; display: flex; flex-direction: column; }
+        }
+        @media (max-width: 1023px) {
+            .nav { display: flex; gap: .25rem; overflow-x: auto; }
+        }
+
+        /* Componentes */
+        .card { background: #fff; border: 1px solid var(--line); border-radius: 8px; }
+        .card-head { display: flex; justify-content: space-between; align-items: center; padding: .9rem 1.25rem;
+                     border-bottom: 1px solid var(--line); background: var(--tint); border-radius: 8px 8px 0 0; }
+        .card-head h2, .card-head h3 { font-size: .95rem; font-weight: 600; }
+        .link { color: var(--pine-2); font-size: .85rem; font-weight: 500; }
+        .link:hover { text-decoration: underline; }
+        .group-title { font-size: .8rem; font-weight: 600; color: var(--muted); padding-bottom: .4rem; border-bottom: 1px solid var(--line); margin-bottom: .9rem; }
+        .field label { display: block; font-size: .8rem; font-weight: 500; color: #2D3C36; margin-bottom: .3rem; }
+        .field input, .field select { width: 100%; border: 1px solid #C2CDC7; border-radius: 6px; padding: .55rem .7rem;
+                                      font-size: .9rem; background: #fff; color: var(--ink); }
+        .field input::placeholder { color: #93A19B; }
+        .field input:focus, .field select:focus { outline: 2px solid var(--focus); outline-offset: 1px; border-color: var(--focus); }
+        .item-box { background: var(--tint); border: 1px solid var(--line); border-left: 4px solid var(--rule, var(--pine-2));
+                    border-radius: 6px; padding: 1rem; }
+        .btn { display: inline-block; padding: .6rem 1.25rem; border-radius: 6px; color: #fff; font-weight: 600; font-size: .9rem;
+               cursor: pointer; transition: filter .15s; }
+        .btn:hover { filter: brightness(1.12); }
+        .btn:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+        .btn-main { background: var(--pine-2); }
+        .btn-entry { background: var(--entry); }
+        .btn-exit { background: var(--exit); }
+
+        .tbl { width: 100%; text-align: left; font-size: .875rem; border-collapse: collapse; }
+        .tbl th { padding: .65rem 1rem; font-size: .78rem; font-weight: 600; color: var(--muted); background: var(--tint); border-bottom: 1px solid var(--line); white-space: nowrap; }
+        .tbl td { padding: .7rem 1rem; border-bottom: 1px solid #E6EBE7; }
+        .tbl tbody tr:last-child td { border-bottom: 0; }
+        .tbl tbody tr:hover { background: #F9FBF8; }
+        .tbl .num { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; white-space: nowrap; }
+        .tbl tr.in td:first-child { box-shadow: inset 3px 0 0 var(--entry); }
+        .tbl tr.out td:first-child { box-shadow: inset 3px 0 0 var(--exit); }
+        .empty { padding: 1.75rem 1rem !important; text-align: center; color: #8A9892; }
+        .chip { display: inline-block; padding: .1rem .55rem; border-radius: 999px; font-size: .75rem; font-weight: 600; }
+        .chip-ok { background: var(--entry-bg); color: var(--entry); }
+        .chip-zero { background: var(--alert-bg); color: var(--alert); }
+
+        .flash { border: 1px solid; border-left-width: 4px; border-radius: 6px; padding: .75rem 1rem; margin-bottom: 1rem; font-size: .9rem; font-weight: 500; }
+        .flash-success { background: var(--entry-bg); border-color: var(--entry); color: #14472F; }
+        .flash-danger { background: var(--alert-bg); border-color: var(--alert); color: #7A2019; }
+        .flash-info { background: #E6EEF2; border-color: #46718A; color: #254457; }
+    </style>
+</head>
+<body class="min-h-screen lg:flex">
+    {% set ep = request.endpoint %}
+
+    <!-- Barra lateral -->
+    <aside class="sidebar px-4 py-4 lg:py-6">
+        <div class="flex items-center gap-3 lg:px-2 lg:mb-8 mb-3">
+            <span class="display flex items-center justify-center w-10 h-10 rounded-md font-bold text-sm" style="background:var(--brass);color:var(--pine)">CV</span>
+            <div class="leading-tight">
+                <p class="display font-semibold text-base">Parque de Materiales</p>
+                <p class="text-xs" style="color:#9DB5AB">COESVI Durango</p>
+            </div>
+        </div>
+
+        <nav class="nav lg:flex-col lg:space-y-1">
+            <a href="{{ url_for('index') }}" class="{% if ep == 'index' %}active{% endif %}">
+                <svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8M5 10v10h14V10"/></svg>Inicio
+            </a>
+            <a href="{{ url_for('inventario') }}" class="{% if ep == 'inventario' %}active{% endif %}">
+                <svg viewBox="0 0 24 24"><path d="M21 8l-9-5-9 5v8l9 5 9-5V8zM3 8l9 5 9-5M12 13v8"/></svg>Inventario
+            </a>
+            <a href="{{ url_for('entradas') }}" class="{% if ep == 'entradas' %}active{% endif %}">
+                <svg viewBox="0 0 24 24"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 17v3h16v-3"/></svg>Entradas
+            </a>
+            <a href="{{ url_for('salidas') }}" class="{% if ep == 'salidas' %}active{% endif %}">
+                <svg viewBox="0 0 24 24"><path d="M12 15V3m0 0L8 7m4-4l4 4M4 17v3h16v-3"/></svg>Salidas
+            </a>
+        </nav>
+
+        <p class="hidden lg:block mt-auto px-2 text-xs leading-relaxed" style="color:#7F9A8F">
+            Sistema de control interno e inventario
+        </p>
+    </aside>
+
+    <!-- Contenido -->
+    <div class="flex-1 min-w-0">
+        <main class="max-w-6xl mx-auto px-4 sm:px-8 py-6 lg:py-8">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="flash {% if category == 'success' %}flash-success{% elif category == 'danger' %}flash-danger{% else %}flash-info{% endif %}" role="alert">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+</body>
+</html>
